@@ -90,7 +90,8 @@ class BookingForm(FlaskForm):
     submit = SubmitField('Confirm Booking')
 
 class AddMoneyForm(FlaskForm):
-    amount = FloatField('Amount (₹)', validators=[DataRequired(), NumberRange(min=1)])
+    amount = FloatField('Amount (₹)', validators=[DataRequired(), NumberRange(min=1)], 
+                        render_kw={"min": "1", "step": "any", "placeholder": "Enter amount"})
     submit = SubmitField('Add to Wallet')
 
 class AddFlightForm(FlaskForm):

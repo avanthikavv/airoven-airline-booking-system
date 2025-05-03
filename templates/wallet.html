@@ -28,7 +28,8 @@
                                 <label for="amount" class="form-label">Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    {{ form.amount(class="form-control", placeholder="Enter amount to add") }}
+                                    <input type="number" name="amount" id="amount" class="form-control" 
+                                           placeholder="Enter amount to add" min="1" step="any" required>
                                 </div>
                                 {% if form.amount.errors %}
                                     <div class="text-danger">
@@ -41,7 +42,7 @@
                             
                             <div class="mb-3">
                                 <div class="d-grid">
-                                    {{ form.submit(class="btn btn-primary") }}
+                                    <button type="submit" class="btn btn-primary">Add to Wallet</button>
                                 </div>
                             </div>
                             

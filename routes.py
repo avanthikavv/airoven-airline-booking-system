@@ -467,8 +467,8 @@ def register_routes(app):
                 try:
                     preset_amount = float(request.form['preset_amount'])
                     if preset_amount > 0:
-                        # Add amount to wallet using the User model method
-                        current_user.add_to_wallet(preset_amount)
+                        # Add amount to wallet directly
+                        current_user.wallet_balance += preset_amount
                         db.session.commit()
                         flash(f'₹{preset_amount} added to your wallet successfully.', 'success')
                     else:
@@ -477,12 +477,12 @@ def register_routes(app):
                     flash('Invalid amount format.', 'danger')
             
             # Handle form submission from the main form
-            elif form.validate_on_submit():
+            elif 'amount' in request.form:
                 try:
-                    amount = form.amount.data
+                    amount = float(request.form['amount'])
                     if amount > 0:
-                        # Add amount to wallet using the User model method
-                        current_user.add_to_wallet(amount)
+                        # Add amount to wallet directly
+                        current_user.wallet_balance += amount
                         db.session.commit()
                         flash(f'₹{amount} added to your wallet successfully.', 'success')
                     else:
