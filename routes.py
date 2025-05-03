@@ -59,6 +59,9 @@ def populate_flight_data():
     # Status options
     status_options = ['On Time', 'Delayed', 'On Time', 'On Time', 'Advance']
     
+    # Keep track of used flight numbers to avoid duplicates
+    used_flight_numbers = set()
+    
     # Create 50 flights
     for i in range(1, 51):
         # Select random origin and destination (ensuring they're different)
@@ -83,8 +86,12 @@ def populate_flight_data():
             
         arrival_time = departure_time + timedelta(hours=flight_duration)
         
-        # Generate flight number
-        flight_number = f"AO{random.randint(100, 999)}"
+        # Generate a unique flight number
+        while True:
+            flight_number = f"AO{random.randint(100, 999)}"
+            if flight_number not in used_flight_numbers:
+                used_flight_numbers.add(flight_number)
+                break
         
         # Pricing (economy, premium, business)
         if is_domestic:
@@ -95,23 +102,32 @@ def populate_flight_data():
         premium_price = round(economy_price * 1.5, 2)
         business_price = round(economy_price * 3, 2)
         
-        flight = Flight(
-            flight_number=flight_number,
-            origin=origin,
-            destination=destination,
-            departure_time=departure_time,
-            arrival_time=arrival_time,
-            status=random.choice(status_options),
-            economy_price=economy_price,
-            premium_price=premium_price,
-            business_price=business_price,
-            aircraft_type=random.choice(aircraft_types),
-            distance_km=distance
-        )
-        
-        db.session.add(flight)
+        try:
+            flight = Flight(
+                flight_number=flight_number,
+                origin=origin,
+                destination=destination,
+                departure_time=departure_time,
+                arrival_time=arrival_time,
+                status=random.choice(status_options),
+                economy_price=economy_price,
+                premium_price=premium_price,
+                business_price=business_price,
+                aircraft_type=random.choice(aircraft_types),
+                distance_km=distance
+            )
+            
+            db.session.add(flight)
+        except Exception as e:
+            print(f"Error adding flight {flight_number}: {str(e)}")
+            db.session.rollback()
     
-    db.session.commit()
+    try:
+        db.session.commit()
+        print("Successfully populated flight data")
+    except Exception as e:
+        print(f"Error committing flight data: {str(e)}")
+        db.session.rollback()
 
 def register_routes(app):
     # Initialize data when the app starts
@@ -397,9 +413,23 @@ def register_routes(app):
         
         if request.method == 'POST':
             print(f"Form submitted: {request.form}")
-            print(f"Form data: {form.data}")
-            print(f"Form errors: {form.errors}")
             
+            # Direct processing for preset amount buttons
+            if 'preset_amount' in request.form:
+                try:
+                    amount = float(request.form['preset_amount'])
+                    if amount > 0:
+                        # Add amount to wallet
+                        current_user.add_to_wallet(amount)
+                        db.session.commit()
+                        flash(f'₹{amount} added to your wallet successfully.', 'success')
+                    else:
+                        flash('Amount must be greater than 0.', 'danger')
+                except (ValueError, TypeError):
+                    flash('Invalid amount format.', 'danger')
+                return redirect(url_for('wallet'))
+            
+            # Standard form processing
             if form.validate_on_submit():
                 amount = form.amount.data
                 print(f"Amount to be added: {amount}")

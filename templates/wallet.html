@@ -46,11 +46,24 @@
                             </div>
                             
                             <div class="quick-amounts">
+                                <h6 class="mt-3 mb-2">Quick Add:</h6>
                                 <div class="d-flex flex-wrap justify-content-between">
-                                    <button type="button" class="btn btn-outline-primary m-1 amount-btn" data-amount="500">₹500</button>
-                                    <button type="button" class="btn btn-outline-primary m-1 amount-btn" data-amount="1000">₹1,000</button>
-                                    <button type="button" class="btn btn-outline-primary m-1 amount-btn" data-amount="2000">₹2,000</button>
-                                    <button type="button" class="btn btn-outline-primary m-1 amount-btn" data-amount="5000">₹5,000</button>
+                                    <form method="POST" class="m-1">
+                                        <input type="hidden" name="preset_amount" value="500">
+                                        <button type="submit" class="btn btn-outline-primary">₹500</button>
+                                    </form>
+                                    <form method="POST" class="m-1">
+                                        <input type="hidden" name="preset_amount" value="1000">
+                                        <button type="submit" class="btn btn-outline-primary">₹1,000</button>
+                                    </form>
+                                    <form method="POST" class="m-1">
+                                        <input type="hidden" name="preset_amount" value="2000">
+                                        <button type="submit" class="btn btn-outline-primary">₹2,000</button>
+                                    </form>
+                                    <form method="POST" class="m-1">
+                                        <input type="hidden" name="preset_amount" value="5000">
+                                        <button type="submit" class="btn btn-outline-primary">₹5,000</button>
+                                    </form>
                                 </div>
                             </div>
                         </form>
@@ -208,20 +221,7 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Quick amount buttons
-        const amountBtns = document.querySelectorAll('.amount-btn');
-        const amountInput = document.getElementById('amount');
-        
-        amountBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const amount = this.getAttribute('data-amount');
-                amountInput.value = amount;
-                
-                // Highlight the selected button
-                amountBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // No longer needed as quick amounts now use form submissions
     });
 </script>
 {% endblock %}
