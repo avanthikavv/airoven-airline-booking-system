@@ -462,34 +462,28 @@ def register_routes(app):
         form = AddMoneyForm()
         
         if request.method == 'POST':
-            # Check for preset amounts (quick add buttons)
-            if 'preset_amount' in request.form:
-                try:
-                    preset_amount = float(request.form['preset_amount'])
-                    if preset_amount > 0:
-                        # Add amount to wallet directly
-                        current_user.wallet_balance += preset_amount
-                        db.session.commit()
-                        flash(f'₹{preset_amount} added to your wallet successfully.', 'success')
-                    else:
-                        flash('Amount must be greater than 0.', 'danger')
-                except (ValueError, TypeError):
-                    flash('Invalid amount format.', 'danger')
-            
-            # Handle form submission from the main form
-            elif 'amount' in request.form:
-                try:
+            try:
+                # Check for preset amounts (quick add buttons)
+                if 'preset_amount' in request.form:
+                    amount = float(request.form['preset_amount'])
+                # Handle form submission from the main form
+                elif 'amount' in request.form:
                     amount = float(request.form['amount'])
-                    if amount > 0:
-                        # Add amount to wallet directly
-                        current_user.wallet_balance += amount
-                        db.session.commit()
-                        flash(f'₹{amount} added to your wallet successfully.', 'success')
-                    else:
-                        flash('Amount must be greater than 0.', 'danger')
-                except Exception as e:
-                    db.session.rollback()
-                    flash(f'Error adding funds: {str(e)}', 'danger')
+                else:
+                    amount = 0
+                    
+                if amount > 0:
+                    # Add amount to wallet directly
+                    current_user.wallet_balance += amount
+                    db.session.commit()
+                    flash(f'₹{amount} added to your wallet successfully.', 'success')
+                else:
+                    flash('Amount must be greater than 0.', 'danger')
+            except (ValueError, TypeError):
+                flash('Invalid amount format. Please enter a valid number.', 'danger')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error adding funds: {str(e)}', 'danger')
             
             return redirect(url_for('wallet'))
         

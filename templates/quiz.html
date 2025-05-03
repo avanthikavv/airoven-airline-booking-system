@@ -18,10 +18,15 @@
                 <div class="quiz-question mb-4">
                     <h5>{{ questions[i]['question'] }}</h5>
                     <div class="quiz-options mt-3">
-                        {% for option in questions[i]['options'] %}
-                            <label>
-                                <input type="radio" name="question_{{ i+1 }}" value="{{ option[0] }}"> {{ option }}
-                            </label>
+                        {% set field_name = "question_" ~ (i+1) %}
+                        {% set field = form[field_name] %}
+                        {% for subfield in field %}
+                            <div class="form-check">
+                                {{ subfield(class="form-check-input") }}
+                                <label class="form-check-label" for="{{ subfield.id }}">
+                                    {{ subfield.label.text }}
+                                </label>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
