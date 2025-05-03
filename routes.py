@@ -395,15 +395,23 @@ def register_routes(app):
     def wallet():
         form = AddMoneyForm()
         
-        if form.validate_on_submit():
-            amount = form.amount.data
+        if request.method == 'POST':
+            print(f"Form submitted: {request.form}")
+            print(f"Form data: {form.data}")
+            print(f"Form errors: {form.errors}")
             
-            # Add amount to wallet
-            current_user.add_to_wallet(amount)
-            db.session.commit()
-            
-            flash(f'₹{amount} added to your wallet successfully.', 'success')
-            return redirect(url_for('wallet'))
+            if form.validate_on_submit():
+                amount = form.amount.data
+                print(f"Amount to be added: {amount}")
+                
+                # Add amount to wallet
+                current_user.add_to_wallet(amount)
+                db.session.commit()
+                
+                flash(f'₹{amount} added to your wallet successfully.', 'success')
+                return redirect(url_for('wallet'))
+            else:
+                print(f"Form validation failed: {form.errors}")
         
         return render_template('wallet.html', form=form)
     
