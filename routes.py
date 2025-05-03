@@ -290,11 +290,19 @@ def register_routes(app):
             origin = origin.title()
             destination = destination.title()
             
-            # Search for direct flights - case insensitive search
+            # Search for direct flights - exact match first, then partial match
+            # First try exact match
             direct_flights = Flight.query.filter(
-                Flight.origin.ilike(f"%{origin}%"), 
-                Flight.destination.ilike(f"%{destination}%")
+                db.func.lower(Flight.origin) == origin.lower(),
+                db.func.lower(Flight.destination) == destination.lower()
             ).all()
+            
+            # If no exact matches, try partial matches
+            if not direct_flights:
+                direct_flights = Flight.query.filter(
+                    Flight.origin.ilike(f"%{origin}%"), 
+                    Flight.destination.ilike(f"%{destination}%")
+                ).all()
             
             print(f"Found {len(direct_flights)} direct flights")
             
@@ -306,17 +314,35 @@ def register_routes(app):
             # If no direct flights, find connecting flights
             connecting_flights = []
             
-            # Find flights from origin to any city
-            first_leg_flights = Flight.query.filter(Flight.origin.ilike(f"%{origin}%")).all()
+            # Find flights from origin to any city - try exact match first
+            first_leg_flights = Flight.query.filter(
+                db.func.lower(Flight.origin) == origin.lower()
+            ).all()
+            
+            # If no exact matches, try partial matches
+            if not first_leg_flights:
+                first_leg_flights = Flight.query.filter(
+                    Flight.origin.ilike(f"%{origin}%")
+                ).all()
+                
             print(f"Found {len(first_leg_flights)} potential first legs")
             
             for first_leg in first_leg_flights:
-                # Find flights from the connection city to the destination
+                # Find flights from the connection city to the destination - exact match on connection city
                 connection_city = first_leg.destination
+                
+                # Try exact match for second leg
                 second_leg_flights = Flight.query.filter(
-                    Flight.origin.ilike(f"%{connection_city}%"),
-                    Flight.destination.ilike(f"%{destination}%")
+                    db.func.lower(Flight.origin) == connection_city.lower(),
+                    db.func.lower(Flight.destination) == destination.lower()
                 ).all()
+                
+                # If no exact matches, try partial matches for destination only
+                if not second_leg_flights:
+                    second_leg_flights = Flight.query.filter(
+                        db.func.lower(Flight.origin) == connection_city.lower(),
+                        Flight.destination.ilike(f"%{destination}%")
+                    ).all()
                 
                 print(f"Found {len(second_leg_flights)} potential second legs from {connection_city}")
                 

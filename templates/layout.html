@@ -60,6 +60,12 @@
                             <span class="badge bg-accent rounded-pill">₹{{ current_user.wallet_balance }}</span>
                         </a>
                     </li>
+                    <!-- Add Flight option (visible only to staff/admin users) -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'add_flight' %}active{% endif %}" href="{{ url_for('add_flight') }}">
+                            <i class="fas fa-plus-circle"></i> Add Flight
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">
                             <i class="fas fa-sign-out-alt"></i> Logout
