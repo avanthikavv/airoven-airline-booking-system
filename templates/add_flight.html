@@ -1,0 +1,248 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Add New Flight</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_flight') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="row">
+                    <!-- Flight Details -->
+                    <div class="col-md-4 mb-3">
+                        <h5>Flight Details</h5>
+                        <div class="mb-3">
+                            <label for="flight_number" class="form-label">Flight Number</label>
+                            {{ form.flight_number(class="form-control", placeholder="e.g. AO123") }}
+                            {% if form.flight_number.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.flight_number.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="origin" class="form-label">Origin City</label>
+                            {{ form.origin(class="form-control", placeholder="e.g. Mumbai") }}
+                            {% if form.origin.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.origin.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="destination" class="form-label">Destination City</label>
+                            {{ form.destination(class="form-control", placeholder="e.g. Delhi") }}
+                            {% if form.destination.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.destination.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="distance_km" class="form-label">Distance (km)</label>
+                            {{ form.distance_km(class="form-control", placeholder="e.g. 1200") }}
+                            {% if form.distance_km.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.distance_km.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            {{ form.status(class="form-select") }}
+                            {% if form.status.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.status.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Departure and Arrival -->
+                    <div class="col-md-4 mb-3">
+                        <h5>Schedule</h5>
+                        <div class="mb-3">
+                            <label for="departure_date" class="form-label">Departure Date (YYYY-MM-DD)</label>
+                            {{ form.departure_date(class="form-control", placeholder="e.g. 2025-06-01") }}
+                            {% if form.departure_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.departure_date.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="departure_time" class="form-label">Departure Time (HH:MM)</label>
+                            {{ form.departure_time(class="form-control", placeholder="e.g. 14:30") }}
+                            {% if form.departure_time.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.departure_time.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="arrival_date" class="form-label">Arrival Date (YYYY-MM-DD)</label>
+                            {{ form.arrival_date(class="form-control", placeholder="e.g. 2025-06-01") }}
+                            {% if form.arrival_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.arrival_date.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="arrival_time" class="form-label">Arrival Time (HH:MM)</label>
+                            {{ form.arrival_time(class="form-control", placeholder="e.g. 16:45") }}
+                            {% if form.arrival_time.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.arrival_time.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="aircraft_type" class="form-label">Aircraft Type</label>
+                            {{ form.aircraft_type(class="form-control", placeholder="e.g. Boeing 737-800") }}
+                            {% if form.aircraft_type.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.aircraft_type.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing and Seats -->
+                    <div class="col-md-4 mb-3">
+                        <h5>Pricing & Capacity</h5>
+                        <div class="mb-3">
+                            <label for="economy_price" class="form-label">Economy Price (₹)</label>
+                            {{ form.economy_price(class="form-control", placeholder="e.g. 5000") }}
+                            {% if form.economy_price.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.economy_price.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="premium_price" class="form-label">Premium Price (₹)</label>
+                            {{ form.premium_price(class="form-control", placeholder="e.g. 7500") }}
+                            {% if form.premium_price.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.premium_price.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="business_price" class="form-label">Business Price (₹)</label>
+                            {{ form.business_price(class="form-control", placeholder="e.g. 15000") }}
+                            {% if form.business_price.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.business_price.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="available_seats_economy" class="form-label">Economy Seats</label>
+                            {{ form.available_seats_economy(class="form-control") }}
+                            {% if form.available_seats_economy.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.available_seats_economy.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="available_seats_premium" class="form-label">Premium Seats</label>
+                            {{ form.available_seats_premium(class="form-control") }}
+                            {% if form.available_seats_premium.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.available_seats_premium.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="available_seats_business" class="form-label">Business Seats</label>
+                            {{ form.available_seats_business(class="form-control") }}
+                            {% if form.available_seats_business.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.available_seats_business.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('flight_schedules') }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-calculate premium and business prices based on economy price
+        const economyPrice = document.getElementById('economy_price');
+        const premiumPrice = document.getElementById('premium_price');
+        const businessPrice = document.getElementById('business_price');
+        
+        economyPrice.addEventListener('input', function() {
+            const ecoPrice = parseFloat(this.value) || 0;
+            premiumPrice.value = (ecoPrice * 1.5).toFixed(2);
+            businessPrice.value = (ecoPrice * 3).toFixed(2);
+        });
+    });
+</script>
+{% endblock %}

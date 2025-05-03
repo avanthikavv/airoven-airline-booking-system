@@ -89,9 +89,14 @@
                             <td><span class="flight-status">{{ flight.status }}</span></td>
                             <td>₹{{ flight.economy_price }}</td>
                             <td>
-                                <a href="{{ url_for('flight_details', flight_id=flight.id) }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-info-circle"></i> Details
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('flight_details', flight_id=flight.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </a>
+                                    <a href="{{ url_for('book_flight', flight_id=flight.id) }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-ticket-alt"></i> Book
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

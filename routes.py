@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 from app import db
 from models import User, Flight, Booking
-from forms import SignupForm, LoginForm, QuizForm, SearchFlightForm, BookingForm, AddMoneyForm
+from forms import SignupForm, LoginForm, QuizForm, SearchFlightForm, BookingForm, AddMoneyForm, AddFlightForm
 
 # Quiz questions
 quiz_questions = [
@@ -179,6 +179,9 @@ def register_routes(app):
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if current_user.is_authenticated:
+            # If user has not completed the quiz, redirect to quiz
+            if not current_user.quiz_completed:
+                return redirect(url_for('quiz'))
             return redirect(url_for('home'))
         
         form = LoginForm()
@@ -191,6 +194,7 @@ def register_routes(app):
                 
                 # If user has not completed the quiz, redirect to quiz
                 if not user.quiz_completed:
+                    flash('Please complete this quick aviation safety quiz to continue.', 'info')
                     return redirect(url_for('quiz'))
                 
                 flash('Logged in successfully!', 'success')
@@ -275,12 +279,24 @@ def register_routes(app):
     def search_flights():
         form = SearchFlightForm()
         
-        if form.validate_on_submit():
-            origin = form.origin.data
-            destination = form.destination.data
+        if form.validate_on_submit() or request.method == 'POST':
+            # Get search parameters
+            origin = form.origin.data.strip() if form.origin.data else request.form.get('origin', '').strip()
+            destination = form.destination.data.strip() if form.destination.data else request.form.get('destination', '').strip()
             
-            # Search for direct flights
-            direct_flights = Flight.query.filter_by(origin=origin, destination=destination).all()
+            print(f"Searching flights from {origin} to {destination}")
+            
+            # Convert to title case for consistency (e.g., "delhi" -> "Delhi")
+            origin = origin.title()
+            destination = destination.title()
+            
+            # Search for direct flights - case insensitive search
+            direct_flights = Flight.query.filter(
+                Flight.origin.ilike(f"%{origin}%"), 
+                Flight.destination.ilike(f"%{destination}%")
+            ).all()
+            
+            print(f"Found {len(direct_flights)} direct flights")
             
             # If direct flights are found
             if direct_flights:
@@ -291,12 +307,18 @@ def register_routes(app):
             connecting_flights = []
             
             # Find flights from origin to any city
-            first_leg_flights = Flight.query.filter_by(origin=origin).all()
+            first_leg_flights = Flight.query.filter(Flight.origin.ilike(f"%{origin}%")).all()
+            print(f"Found {len(first_leg_flights)} potential first legs")
             
             for first_leg in first_leg_flights:
                 # Find flights from the connection city to the destination
                 connection_city = first_leg.destination
-                second_leg_flights = Flight.query.filter_by(origin=connection_city, destination=destination).all()
+                second_leg_flights = Flight.query.filter(
+                    Flight.origin.ilike(f"%{connection_city}%"),
+                    Flight.destination.ilike(f"%{destination}%")
+                ).all()
+                
+                print(f"Found {len(second_leg_flights)} potential second legs from {connection_city}")
                 
                 for second_leg in second_leg_flights:
                     # Ensure there's enough connection time (at least 2 hours)
@@ -310,6 +332,8 @@ def register_routes(app):
                             'total_price_premium': first_leg.premium_price + second_leg.premium_price,
                             'total_price_business': first_leg.business_price + second_leg.business_price
                         })
+            
+            print(f"Found {len(connecting_flights)} valid connecting flights")
             
             return render_template('search_flights.html', form=form, connecting_flights=connecting_flights,
                                   direct_flights=direct_flights, origin=origin, destination=destination)
@@ -412,39 +436,88 @@ def register_routes(app):
         form = AddMoneyForm()
         
         if request.method == 'POST':
-            print(f"Form submitted: {request.form}")
-            
-            # Direct processing for preset amount buttons
-            if 'preset_amount' in request.form:
+            if 'amount' in request.form:
                 try:
-                    amount = float(request.form['preset_amount'])
+                    amount = float(request.form['amount'])
                     if amount > 0:
                         # Add amount to wallet
-                        current_user.add_to_wallet(amount)
+                        current_user.wallet_balance += amount
                         db.session.commit()
                         flash(f'₹{amount} added to your wallet successfully.', 'success')
                     else:
                         flash('Amount must be greater than 0.', 'danger')
                 except (ValueError, TypeError):
                     flash('Invalid amount format.', 'danger')
-                return redirect(url_for('wallet'))
+                    
+            # Check for preset amounts (quick add buttons)
+            elif 'preset_amount' in request.form:
+                try:
+                    preset_amount = float(request.form['preset_amount'])
+                    if preset_amount > 0:
+                        # Add amount to wallet directly
+                        current_user.wallet_balance += preset_amount
+                        db.session.commit()
+                        flash(f'₹{preset_amount} added to your wallet successfully.', 'success')
+                    else:
+                        flash('Amount must be greater than 0.', 'danger')
+                except (ValueError, TypeError):
+                    flash('Invalid amount format.', 'danger')
             
-            # Standard form processing
-            if form.validate_on_submit():
-                amount = form.amount.data
-                print(f"Amount to be added: {amount}")
-                
-                # Add amount to wallet
-                current_user.add_to_wallet(amount)
-                db.session.commit()
-                
-                flash(f'₹{amount} added to your wallet successfully.', 'success')
-                return redirect(url_for('wallet'))
-            else:
-                print(f"Form validation failed: {form.errors}")
+            return redirect(url_for('wallet'))
         
         return render_template('wallet.html', form=form)
     
+    @app.route('/add_flight', methods=['GET', 'POST'])
+    @login_required
+    def add_flight():
+        form = AddFlightForm()
+        
+        if form.validate_on_submit():
+            try:
+                # Parse dates and times
+                departure_date_str = form.departure_date.data
+                departure_time_str = form.departure_time.data
+                arrival_date_str = form.arrival_date.data
+                arrival_time_str = form.arrival_time.data
+                
+                # Combine date and time strings
+                departure_datetime_str = f"{departure_date_str} {departure_time_str}"
+                arrival_datetime_str = f"{arrival_date_str} {arrival_time_str}"
+                
+                # Parse to datetime objects
+                departure_datetime = datetime.strptime(departure_datetime_str, "%Y-%m-%d %H:%M")
+                arrival_datetime = datetime.strptime(arrival_datetime_str, "%Y-%m-%d %H:%M")
+                
+                # Create new flight
+                new_flight = Flight(
+                    flight_number=form.flight_number.data,
+                    origin=form.origin.data,
+                    destination=form.destination.data,
+                    departure_time=departure_datetime,
+                    arrival_time=arrival_datetime,
+                    economy_price=form.economy_price.data,
+                    premium_price=form.premium_price.data,
+                    business_price=form.business_price.data,
+                    aircraft_type=form.aircraft_type.data,
+                    status=form.status.data,
+                    distance_km=form.distance_km.data,
+                    available_seats_economy=form.available_seats_economy.data,
+                    available_seats_premium=form.available_seats_premium.data,
+                    available_seats_business=form.available_seats_business.data
+                )
+                
+                db.session.add(new_flight)
+                db.session.commit()
+                
+                flash(f'Flight {new_flight.flight_number} added successfully!', 'success')
+                return redirect(url_for('flight_schedules'))
+                
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error adding flight: {str(e)}', 'danger')
+        
+        return render_template('add_flight.html', form=form)
+        
     @app.route('/get_flight_path/<int:flight_id>')
     @login_required
     def get_flight_path(flight_id):

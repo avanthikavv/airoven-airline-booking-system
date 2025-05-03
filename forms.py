@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, IntegerField, SelectField, SubmitField, FloatField, RadioField, HiddenField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, NumberRange, ValidationError
 import re
+from datetime import datetime, timedelta
 
 class SignupForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
@@ -91,3 +92,27 @@ class BookingForm(FlaskForm):
 class AddMoneyForm(FlaskForm):
     amount = FloatField('Amount (₹)', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Add to Wallet')
+
+class AddFlightForm(FlaskForm):
+    flight_number = StringField('Flight Number', validators=[DataRequired(), Length(min=2, max=10)])
+    origin = StringField('Origin City', validators=[DataRequired(), Length(min=2, max=64)])
+    destination = StringField('Destination City', validators=[DataRequired(), Length(min=2, max=64)])
+    departure_date = StringField('Departure Date (YYYY-MM-DD)', validators=[DataRequired()])
+    departure_time = StringField('Departure Time (HH:MM)', validators=[DataRequired()])
+    arrival_date = StringField('Arrival Date (YYYY-MM-DD)', validators=[DataRequired()])
+    arrival_time = StringField('Arrival Time (HH:MM)', validators=[DataRequired()])
+    economy_price = FloatField('Economy Price (₹)', validators=[DataRequired(), NumberRange(min=1)])
+    premium_price = FloatField('Premium Price (₹)', validators=[DataRequired(), NumberRange(min=1)])
+    business_price = FloatField('Business Price (₹)', validators=[DataRequired(), NumberRange(min=1)])
+    aircraft_type = StringField('Aircraft Type', validators=[DataRequired(), Length(min=2, max=50)])
+    status = SelectField('Status', choices=[
+        ('On Time', 'On Time'),
+        ('Delayed', 'Delayed'),
+        ('Cancelled', 'Cancelled'),
+        ('Advanced', 'Advanced')
+    ], validators=[DataRequired()])
+    distance_km = IntegerField('Distance (km)', validators=[DataRequired(), NumberRange(min=1)])
+    available_seats_economy = IntegerField('Economy Seats', validators=[DataRequired(), NumberRange(min=0)], default=100)
+    available_seats_premium = IntegerField('Premium Seats', validators=[DataRequired(), NumberRange(min=0)], default=50)
+    available_seats_business = IntegerField('Business Seats', validators=[DataRequired(), NumberRange(min=0)], default=20)
+    submit = SubmitField('Add Flight')
