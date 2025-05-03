@@ -45,28 +45,29 @@
                                 </div>
                             </div>
                             
-                            <div class="quick-amounts">
-                                <h6 class="mt-3 mb-2">Quick Add:</h6>
-                                <div class="d-flex flex-wrap justify-content-between">
-                                    <form method="POST" class="m-1">
-                                        <input type="hidden" name="preset_amount" value="500">
-                                        <button type="submit" class="btn btn-outline-primary">₹500</button>
-                                    </form>
-                                    <form method="POST" class="m-1">
-                                        <input type="hidden" name="preset_amount" value="1000">
-                                        <button type="submit" class="btn btn-outline-primary">₹1,000</button>
-                                    </form>
-                                    <form method="POST" class="m-1">
-                                        <input type="hidden" name="preset_amount" value="2000">
-                                        <button type="submit" class="btn btn-outline-primary">₹2,000</button>
-                                    </form>
-                                    <form method="POST" class="m-1">
-                                        <input type="hidden" name="preset_amount" value="5000">
-                                        <button type="submit" class="btn btn-outline-primary">₹5,000</button>
-                                    </form>
-                                </div>
-                            </div>
                         </form>
+                        
+                        <div class="quick-amounts">
+                            <h6 class="mt-4 mb-2">Quick Add:</h6>
+                            <div class="d-flex flex-wrap justify-content-between">
+                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
+                                    <input type="hidden" name="preset_amount" value="500">
+                                    <button type="submit" class="btn btn-outline-primary">₹500</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
+                                    <input type="hidden" name="preset_amount" value="1000">
+                                    <button type="submit" class="btn btn-outline-primary">₹1,000</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
+                                    <input type="hidden" name="preset_amount" value="2000">
+                                    <button type="submit" class="btn btn-outline-primary">₹2,000</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
+                                    <input type="hidden" name="preset_amount" value="5000">
+                                    <button type="submit" class="btn btn-outline-primary">₹5,000</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
