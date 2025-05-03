@@ -233,7 +233,26 @@ def register_routes(app):
     def flight_schedules():
         # Get all flights
         flights = Flight.query.all()
-        return render_template('flight_schedules.html', flights=flights)
+        
+        # Create a JSON-serializable list of flight data
+        serializable_flights = []
+        for flight in flights:
+            serializable_flights.append({
+                'id': flight.id,
+                'flight_number': flight.flight_number,
+                'origin': flight.origin,
+                'destination': flight.destination,
+                'departure_time_str': flight.departure_time.strftime('%d-%b-%Y %H:%M'),
+                'arrival_time_str': flight.arrival_time.strftime('%d-%b-%Y %H:%M'),
+                'duration_hours': ((flight.arrival_time - flight.departure_time).total_seconds() / 3600),
+                'status': flight.status,
+                'economy_price': flight.economy_price,
+                'premium_price': flight.premium_price,
+                'business_price': flight.business_price,
+                'aircraft_type': flight.aircraft_type
+            })
+        
+        return render_template('flight_schedules.html', flights=flights, flight_data=serializable_flights)
     
     @app.route('/search_flights', methods=['GET', 'POST'])
     @login_required

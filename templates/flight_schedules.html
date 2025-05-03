@@ -107,7 +107,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Populate filters with unique values
-        const flights = {{ flights|tojson }};
+        const flights = {{ flight_data|tojson }};
         const origins = new Set();
         const destinations = new Set();
         
