@@ -1,0 +1,57 @@
+i want to create a website for my project efficient airlines reservation system. there is nothing called admin or user modules.  so i will tell you what and all to have please dont give any errors.
+
+FRONTEND: BOOTSTRAP(html), BACKEND: FLASK, DATABASE: SQLALCHEMY
+
+the name of the company is AIROVEN. it should be displayed at the top and add some professional designs to all the web pages
+the theme should be dark and add mindblowing designs
+
+the log in page should come at the opening of the website. it should ask sign up or sign in. sign up means new user. get the details of first name,last name,age,gender(male,female or other),gmail and ask them to set a new password(at least 8 characters). after signing up, the user should be redirected to the quiz page.
+
+if in sign in, the user enter a valid login credentials, redirect them to the quiz page. otherwise redirect them to the sign up page.
+
+there is something called wallet from which the amount is credited or debited.The wallet should have money in Rs. when the user answers correctly for the quiz, they should be given bonus for each correct answer and it should be added to their wallet. have separate page for wallets to view the money and in the same wallets page, add money option should be there to add money directly( there is no use of UPI or online payment ..just for project purposes). the quiz is optional. after that redirect the user to the home page.
+
+quiz_questions = [
+    {
+        'question': "Why are passengers required to switch electronic devices to airplane mode during a flight?",
+        'options': ["A. To save battery", "B. To avoid interference with aircraft systems", "C. To reduce noise", "D. For entertainment purposes"],
+        'correct': "B"
+    },
+    {
+        'question': "What is the purpose of the safety card found in the seat pocket on an airplane?",
+        'options': ["A. To advertise travel destinations", "B. To guide passengers on using in-flight entertainment", "C. To provide instructions during an emergency", "D. To offer discount coupons"],
+        'correct': "C"
+    },
+    {
+        'question': "When should a passenger wear a seatbelt during a flight?",
+        'options': ["A. Only during takeoff", "B. Only when sleeping", "C. Only during turbulence", "D. During takeoff, landing, and whenever the seatbelt sign is on"],
+        'correct': "D"
+    },
+    {
+        'question': "What color are the emergency lights that guide passengers to exits during an evacuation?",
+        'options': ["A. Blue", "B. Green", "C. Red", "D. White"],
+        'correct': "B"
+    },
+    {
+        'question': "Why are cabin lights dimmed during takeoff and landing at night?",
+        'options': ["A. To save power", "B. To help passengers sleep", "C. To adjust eyes to darkness in case of emergency", "D. To improve Wi-Fi connection"],
+        'correct': "C"
+    }
+]
+
+in the home page, have options like flight schedules, search flights,cancel flight and wallet
+
+if the user selects flight schedules option,he should be taken to the flight schedules page where the details of all the flights of the airoven company is displayed.by defaoult there should be 50 flights displayed in the flight schedule page without adding anything. the page have the flight number, airline, departure time,arrival time, origin, destination, flight status (delayed/on time/advance), cost and have another option or a button near all the flight details like "more info". if user clicks the more info, he should be taken to page. have a separate option like "add new flights" at the bottom of the flight schedule page so that if the user wants to add an new flights, it would be useful (remember the the user is the admin over here and the admin books the tickets for the user basically). if the user clicks the button, he should be taken to a page where he would be able to add new flights and it should ask for the above mentioned data where for the flight name there should be default names to select as choice and add it other respective database and go to the home page. but incase if the user gives the more info button, he should be taken to a page that asks for class selection where he would be asked to select the class of travel (business, premium or economy) cost varied accordingly.  after the class selection, he should be taken to a page to select the seat number he wants. that page should display seats like in " 2 groups- each group having three columns. window-middle-aisle" cost varies dynamically- if there are 60 seats per class, first 45 seats are on a normal price and the last 15 seats should be a little costly. (dynamic pricing).the selection of seats should have a mind blowing display where each seats are telecasted and the user shoul select seats from there. after the seat selection, the user should have an option like confirm booking, and if he clicks that, he should be taken into a page where he will be asked to enter the details. like the name,age,gender, dob,date of flight passport number, aadhar number, nationality, mother tongue, occupation. in the same page, an option called confirm flight should be there. if the user clicks it, he should be taken to a page that asks him the weight of baggage. check if he is a loyalty member or not (senior citizen aboe 65 years) or government authority or any army official. if he is a loyalty member, give a discount. for every 1 kg of baggage 50 ruppees should be added to he cost of the flight. then have confirm payment option to the bottom of the same page and if the user gives it, he shoould be displayed the summary of the bill and the respetive amount should be debited from the wallet and the messae should be displayed
+
+
+
+if the user selects the search flights option, ask him the origin and destination places. extract data from the flight schedules page and display the available flights.if there are direct flights,display the details of the flightsand ask the user to choose one and have an option name BOOK so that if the user clicks onto it, like the above, the user should be taken to the same page where he is asked to enter the class of travel (business/premium/economy) from there, he should be asked the seat number and all that. then should be prceeded till the deduction of amount from the wallet (same procedure to be followed like in the above mentioned paragraph)   
+suppose if incase there are no direct flights, search for multicity (like having a common destinations -for eg, if there is no direct flight from mumbai toronto, and there are flights from mumbai to london and from london to toronto, display it and have a world map on which the path of travel is traced out. there should be a line that traces out the path and the distances and time of flight between the two cities should also be displayed on the map professionally. after displaying the available flghts, the multicity, for each flight, ask teh user to enter the details of flight (class, seat selection and all the above mentioned data. the same process should be followed to book both the flights. note that the total cost should be displayed after booking both the flights and should be deducted from the wallet).in case of multicity booking the worldmap should be displayed professionally 
+
+if the user selets the cancel flight option, he should be displayed the ticket information and he should have an option called "cancel" and if he clicks that, half of the amount of the ticket should be refunded to his wallet and his ticket should be cancelled or deleted from the database
+
+clicking the wallet option should show him the current amount that he has in his wallet and there shoud be an option called add amount clicking which he can be able to add amount to his wallet. 
+
+at the top of the home page, there should be an option called logout (user can log out from their account)
+
+note that there should be three dataases (one to store flght schedules , another to store logged in users information, and one more to store the details of the tickets booked). please make sure everything works properly
