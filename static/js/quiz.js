@@ -26,19 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       
-      // Enable/disable submit button
-      if (submitButton) {
-        submitButton.disabled = !allAnswered;
-        
-        if (allAnswered) {
-          submitButton.classList.remove('btn-secondary');
-          submitButton.classList.add('btn-primary');
-        } else {
-          submitButton.classList.remove('btn-primary');
-          submitButton.classList.add('btn-secondary');
-        }
-      }
-      
+      // We're now using the form's submit button directly, which is always enabled
       return allAnswered;
     }
     

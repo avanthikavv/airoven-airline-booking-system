@@ -232,13 +232,16 @@ def register_routes(app):
             
             # Add bonus to wallet (Rs. 100 per correct answer)
             bonus_amount = score * 100
-            current_user.add_to_wallet(bonus_amount)
+            # Add directly to wallet balance
+            current_user.wallet_balance += bonus_amount
             current_user.quiz_completed = True
             
-            db.session.commit()
-            
-            # Show results
-            flash(f'Quiz completed! You scored {score}/5 and earned ₹{bonus_amount} bonus in your wallet.', 'success')
+            try:
+                db.session.commit()
+                flash(f'Quiz completed! You scored {score}/5 and earned ₹{bonus_amount} bonus in your wallet.', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error processing quiz results: {str(e)}', 'danger')
             return redirect(url_for('home'))
         
         return render_template('quiz.html', form=form, questions=quiz_questions)
@@ -412,8 +415,8 @@ def register_routes(app):
                 status="Confirmed"
             )
             
-            # Deduct amount from wallet
-            current_user.deduct_from_wallet(price)
+            # Deduct amount from wallet directly
+            current_user.wallet_balance -= price
             
             db.session.add(booking)
             db.session.commit()
@@ -442,8 +445,8 @@ def register_routes(app):
         # Calculate refund amount (50% of the ticket price)
         refund_amount = booking.price_paid * 0.5
         
-        # Add refund to wallet
-        current_user.add_to_wallet(refund_amount)
+        # Add refund to wallet directly
+        current_user.wallet_balance += refund_amount
         
         # Release the seat
         flight = Flight.query.get(booking.flight_id)

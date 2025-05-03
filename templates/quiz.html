@@ -32,7 +32,9 @@
                 </div>
                 {% endfor %}
                 
-                <button type="submit" class="btn btn-primary mt-3" disabled>Submit Quiz</button>
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-primary btn-lg mt-3") }}
+                </div>
             </form>
         </div>
     </div>
