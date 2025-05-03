@@ -1,0 +1,232 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="flight-details-container">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Flight Details</h2>
+            <span class="flight-status">{{ flight.status }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Flight Header -->
+                    <div class="flight-card mb-4">
+                        <div class="content">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="airline-logo">
+                                    AO
+                                </div>
+                                <div>
+                                    <span class="badge bg-secondary">{{ flight.aircraft_type }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-info">
+                                <div class="flight-path">
+                                    <div class="airport">
+                                        <div class="airport-code">{{ flight.origin[:3].upper() }}</div>
+                                        <div class="airport-name">{{ flight.origin }}</div>
+                                        <div class="flight-time">{{ flight.departure_time.strftime('%H:%M') }}</div>
+                                        <div>{{ flight.departure_time.strftime('%d %b %Y') }}</div>
+                                    </div>
+                                    
+                                    <div class="flight-line"></div>
+                                    
+                                    <div class="airport">
+                                        <div class="airport-code">{{ flight.destination[:3].upper() }}</div>
+                                        <div class="airport-name">{{ flight.destination }}</div>
+                                        <div class="flight-time">{{ flight.arrival_time.strftime('%H:%M') }}</div>
+                                        <div>{{ flight.arrival_time.strftime('%d %b %Y') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-details">
+                                <div class="detail">
+                                    <div class="detail-label">Flight</div>
+                                    <div class="detail-value">{{ flight.flight_number }}</div>
+                                </div>
+                                
+                                <div class="detail">
+                                    <div class="detail-label">Duration</div>
+                                    <div class="detail-value">{{ ((flight.arrival_time - flight.departure_time).total_seconds() / 3600)|round(1) }} hrs</div>
+                                </div>
+                                
+                                <div class="detail">
+                                    <div class="detail-label">Distance</div>
+                                    <div class="detail-value">{{ flight.distance_km }} km</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Fare Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h5>Economy</h5>
+                                            <div class="flight-price mb-3">₹{{ flight.economy_price }}</div>
+                                            <ul class="list-unstyled text-start">
+                                                <li><i class="fas fa-check text-success me-2"></i> Standard Seat</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> 15kg Baggage</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Meal Available</li>
+                                            </ul>
+                                            <a href="{{ url_for('book_flight', flight_id=flight.id, travel_class='economy') }}" class="btn btn-outline-primary w-100">
+                                                Book Economy
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card border-primary">
+                                        <div class="card-body text-center">
+                                            <h5>Premium</h5>
+                                            <div class="flight-price mb-3">₹{{ flight.premium_price }}</div>
+                                            <ul class="list-unstyled text-start">
+                                                <li><i class="fas fa-check text-success me-2"></i> Extra Legroom</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> 25kg Baggage</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Priority Boarding</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Complimentary Meal</li>
+                                            </ul>
+                                            <a href="{{ url_for('book_flight', flight_id=flight.id, travel_class='premium') }}" class="btn btn-primary w-100">
+                                                Book Premium
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <h5>Business</h5>
+                                            <div class="flight-price mb-3">₹{{ flight.business_price }}</div>
+                                            <ul class="list-unstyled text-start">
+                                                <li><i class="fas fa-check text-success me-2"></i> Lie-flat Seat</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> 40kg Baggage</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Lounge Access</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Premium Dining</li>
+                                                <li><i class="fas fa-check text-success me-2"></i> Fast Track Security</li>
+                                            </ul>
+                                            <a href="{{ url_for('book_flight', flight_id=flight.id, travel_class='business') }}" class="btn btn-outline-primary w-100">
+                                                Book Business
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Flight Map -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Flight Route</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="flight-map" data-flight-id="{{ flight.id }}" style="height: 300px;"></div>
+                            <div id="flight-info" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Flight Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Flight Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush bg-transparent">
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Flight Number</span>
+                                    <span class="fw-bold">{{ flight.flight_number }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Aircraft</span>
+                                    <span class="fw-bold">{{ flight.aircraft_type }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Status</span>
+                                    <span class="fw-bold flight-status">{{ flight.status }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Departure</span>
+                                    <span class="fw-bold">{{ flight.departure_time.strftime('%d %b %Y, %H:%M') }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Arrival</span>
+                                    <span class="fw-bold">{{ flight.arrival_time.strftime('%d %b %Y, %H:%M') }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Duration</span>
+                                    <span class="fw-bold">{{ ((flight.arrival_time - flight.departure_time).total_seconds() / 3600)|round(1) }} hours</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Distance</span>
+                                    <span class="fw-bold">{{ flight.distance_km }} km</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Seats -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Available Seats</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush bg-transparent">
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Economy</span>
+                                    <span class="badge bg-primary rounded-pill">{{ flight.available_seats_economy }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Premium</span>
+                                    <span class="badge bg-primary rounded-pill">{{ flight.available_seats_premium }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                    <span>Business</span>
+                                    <span class="badge bg-primary rounded-pill">{{ flight.available_seats_business }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Fare Rules -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Fare Rules</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-primary">Cancellation Policy</h6>
+                                <p>Cancellations made before departure are eligible for a 50% refund to your wallet. No refunds after departure.</p>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-primary">Baggage Allowance</h6>
+                                <p>Economy: 15kg, Premium: 25kg, Business: 40kg checked baggage. All classes include 7kg cabin baggage.</p>
+                            </div>
+                            <div>
+                                <h6 class="text-primary">Seat Selection</h6>
+                                <p>Seat selection is available at the time of booking. Premium and Business class passengers get priority seating.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

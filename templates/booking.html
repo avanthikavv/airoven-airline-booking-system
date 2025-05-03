@@ -1,0 +1,458 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="booking-container">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="mb-0">Book Flight</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Flight Details -->
+                    <div class="flight-card mb-4">
+                        <div class="content">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="airline-logo">
+                                    AO
+                                </div>
+                                <div>
+                                    <span class="flight-status">{{ flight.status }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-info">
+                                <div class="flight-path">
+                                    <div class="airport">
+                                        <div class="airport-code">{{ flight.origin[:3].upper() }}</div>
+                                        <div class="airport-name">{{ flight.origin }}</div>
+                                        <div class="flight-time">{{ flight.departure_time.strftime('%H:%M') }}</div>
+                                        <div>{{ flight.departure_time.strftime('%d %b %Y') }}</div>
+                                    </div>
+                                    
+                                    <div class="flight-line"></div>
+                                    
+                                    <div class="airport">
+                                        <div class="airport-code">{{ flight.destination[:3].upper() }}</div>
+                                        <div class="airport-name">{{ flight.destination }}</div>
+                                        <div class="flight-time">{{ flight.arrival_time.strftime('%H:%M') }}</div>
+                                        <div>{{ flight.arrival_time.strftime('%d %b %Y') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-details">
+                                <div class="detail">
+                                    <div class="detail-label">Flight</div>
+                                    <div class="detail-value">{{ flight.flight_number }}</div>
+                                </div>
+                                
+                                <div class="detail">
+                                    <div class="detail-label">Duration</div>
+                                    <div class="detail-value">{{ ((flight.arrival_time - flight.departure_time).total_seconds() / 3600)|round(1) }} hrs</div>
+                                </div>
+                                
+                                <div class="detail">
+                                    <div class="detail-label">Aircraft</div>
+                                    <div class="detail-value">{{ flight.aircraft_type }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Form -->
+                    <form method="POST" action="{{ url_for('book_flight', flight_id=flight.id) }}" class="booking-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Travel Class Selection</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="travel_class" class="form-label">Select Travel Class</label>
+                                    {{ form.travel_class(class="form-select") }}
+                                </div>
+                                
+                                <div class="row" id="classDetails">
+                                    <div class="col-md-4 mb-3 class-detail" id="economy-details">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6>Economy</h6>
+                                                <div class="price mb-2">₹{{ flight.economy_price }}</div>
+                                                <ul class="small ps-3">
+                                                    <li>Standard seat</li>
+                                                    <li>15kg baggage</li>
+                                                    <li>Meal available for purchase</li>
+                                                </ul>
+                                                <div class="seats-available">
+                                                    Available seats: {{ flight.available_seats_economy }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3 class-detail" id="premium-details">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6>Premium</h6>
+                                                <div class="price mb-2">₹{{ flight.premium_price }}</div>
+                                                <ul class="small ps-3">
+                                                    <li>Extra legroom</li>
+                                                    <li>25kg baggage</li>
+                                                    <li>Priority boarding</li>
+                                                    <li>Complimentary meal</li>
+                                                </ul>
+                                                <div class="seats-available">
+                                                    Available seats: {{ flight.available_seats_premium }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3 class-detail" id="business-details">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6>Business</h6>
+                                                <div class="price mb-2">₹{{ flight.business_price }}</div>
+                                                <ul class="small ps-3">
+                                                    <li>Lie-flat seat</li>
+                                                    <li>40kg baggage</li>
+                                                    <li>Lounge access</li>
+                                                    <li>Premium dining</li>
+                                                    <li>Fast track security</li>
+                                                </ul>
+                                                <div class="seats-available">
+                                                    Available seats: {{ flight.available_seats_business }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Passenger Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="passenger_name" class="form-label">Full Name</label>
+                                    {{ form.passenger_name(class="form-control", placeholder="Enter passenger's full name") }}
+                                    {% if form.passenger_name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.passenger_name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="passenger_age" class="form-label">Age</label>
+                                        {{ form.passenger_age(class="form-control", placeholder="Enter passenger's age") }}
+                                        {% if form.passenger_age.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.passenger_age.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="passenger_gender" class="form-label">Gender</label>
+                                        {{ form.passenger_gender(class="form-select") }}
+                                        {% if form.passenger_gender.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.passenger_gender.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="contact_number" class="form-label">Contact Number</label>
+                                    {{ form.contact_number(class="form-control", placeholder="Enter contact number") }}
+                                    {% if form.contact_number.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.contact_number.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Confirm Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Price Summary -->
+                    <div class="card mb-4 sticky-top" style="top: 10px; z-index: 1;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Booking Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Flight:</span>
+                                <span class="fw-bold">{{ flight.flight_number }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Route:</span>
+                                <span class="fw-bold">{{ flight.origin }} → {{ flight.destination }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Date:</span>
+                                <span class="fw-bold">{{ flight.departure_time.strftime('%d %b %Y') }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 selected-class">
+                                <span>Class:</span>
+                                <span class="fw-bold" id="selectedClass">--</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 selected-price">
+                                <span>Fare:</span>
+                                <span class="fw-bold" id="selectedPrice">--</span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="d-flex justify-content-between mb-2 fw-bold fs-5">
+                                <span>Total:</span>
+                                <span id="totalPrice">--</span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="wallet-info">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Your Wallet Balance:</span>
+                                    <span class="fw-bold">₹{{ current_user.wallet_balance }}</span>
+                                </div>
+                                
+                                <div class="wallet-status mt-3" id="walletStatus">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                                
+                                <div class="insufficient-balance d-none" id="insufficientBalance">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> You have insufficient balance in your wallet.
+                                    </div>
+                                    <a href="{{ url_for('wallet') }}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-wallet"></i> Add Money to Wallet
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Rules -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Booking Rules</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-info-circle text-primary"></i> Fare is non-refundable after check-in.
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-info-circle text-primary"></i> Cancellation before departure will refund 50% to your wallet.
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-info-circle text-primary"></i> Check-in opens 24 hours before departure.
+                                </li>
+                                <li>
+                                    <i class="fas fa-info-circle text-primary"></i> Please arrive at the airport at least 2 hours before departure.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Booking Confirmation Modal -->
+    <div class="modal fade" id="confirmBookingModal" tabindex="-1" aria-labelledby="confirmBookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmBookingModalLabel">Confirm Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please review your booking details:</p>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Flight:</span>
+                                <span class="fw-bold">{{ flight.flight_number }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Route:</span>
+                                <span class="fw-bold">{{ flight.origin }} → {{ flight.destination }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Date:</span>
+                                <span class="fw-bold">{{ flight.departure_time.strftime('%d %b %Y') }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Passenger:</span>
+                                <span class="fw-bold" id="modal-passenger-name"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Class:</span>
+                                <span class="fw-bold" id="modal-travel-class"></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Fare:</span>
+                                <span class="fw-bold" id="modal-total-price"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>Amount will be deducted from your wallet upon confirmation.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review</button>
+                    <button type="button" class="btn btn-primary" id="confirmBookingBtn">Confirm Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const travelClassSelect = document.getElementById('travel_class');
+        const selectedClass = document.getElementById('selectedClass');
+        const selectedPrice = document.getElementById('selectedPrice');
+        const totalPrice = document.getElementById('totalPrice');
+        const walletStatus = document.getElementById('walletStatus');
+        const insufficientBalance = document.getElementById('insufficientBalance');
+        
+        const walletBalance = {{ current_user.wallet_balance }};
+        const economyPrice = {{ flight.economy_price }};
+        const premiumPrice = {{ flight.premium_price }};
+        const businessPrice = {{ flight.business_price }};
+        
+        // Initialize with default selected class (if any)
+        updatePriceDisplay();
+        
+        // Update price display when class changes
+        travelClassSelect.addEventListener('change', function() {
+            updatePriceDisplay();
+            
+            // Highlight the selected class card
+            const classDetails = document.querySelectorAll('.class-detail');
+            classDetails.forEach(detail => {
+                detail.querySelector('.card').classList.remove('border-primary');
+            });
+            
+            if (this.value) {
+                document.getElementById(`${this.value}-details`).querySelector('.card').classList.add('border-primary');
+            }
+        });
+        
+        function updatePriceDisplay() {
+            const selectedValue = travelClassSelect.value;
+            let price = 0;
+            
+            if (selectedValue === 'economy') {
+                selectedClass.textContent = 'Economy';
+                price = economyPrice;
+            } else if (selectedValue === 'premium') {
+                selectedClass.textContent = 'Premium';
+                price = premiumPrice;
+            } else if (selectedValue === 'business') {
+                selectedClass.textContent = 'Business';
+                price = businessPrice;
+            } else {
+                selectedClass.textContent = '--';
+            }
+            
+            // Update price display
+            if (price > 0) {
+                selectedPrice.textContent = `₹${price}`;
+                totalPrice.textContent = `₹${price}`;
+                
+                // Check wallet balance
+                if (walletBalance >= price) {
+                    walletStatus.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> You have sufficient balance in your wallet.
+                        </div>
+                    `;
+                    insufficientBalance.classList.add('d-none');
+                } else {
+                    walletStatus.innerHTML = '';
+                    insufficientBalance.classList.remove('d-none');
+                }
+            } else {
+                selectedPrice.textContent = '--';
+                totalPrice.textContent = '--';
+                walletStatus.innerHTML = '';
+                insufficientBalance.classList.add('d-none');
+            }
+        }
+        
+        // Form submission handler
+        const bookingForm = document.querySelector('.booking-form');
+        
+        if (bookingForm) {
+            bookingForm.addEventListener('submit', function(e) {
+                const travelClass = travelClassSelect.value;
+                const passengerName = document.getElementById('passenger_name').value;
+                
+                if (!travelClass || !passengerName) {
+                    return; // Let form validation handle this
+                }
+                
+                let price = 0;
+                if (travelClass === 'economy') price = economyPrice;
+                else if (travelClass === 'premium') price = premiumPrice;
+                else if (travelClass === 'business') price = businessPrice;
+                
+                // Check if wallet has sufficient balance
+                if (walletBalance < price) {
+                    e.preventDefault();
+                    alert('Insufficient balance in your wallet. Please add money to continue.');
+                    window.location.href = "{{ url_for('wallet') }}";
+                    return;
+                }
+                
+                // If we want to show confirmation modal instead of direct submission
+                // e.preventDefault();
+                // document.getElementById('modal-passenger-name').textContent = passengerName;
+                // document.getElementById('modal-travel-class').textContent = selectedClass.textContent;
+                // document.getElementById('modal-total-price').textContent = totalPrice.textContent;
+                // 
+                // const confirmModal = new bootstrap.Modal(document.getElementById('confirmBookingModal'));
+                // confirmModal.show();
+            });
+        }
+        
+        // Confirmation modal submit handler
+        const confirmBookingBtn = document.getElementById('confirmBookingBtn');
+        if (confirmBookingBtn) {
+            confirmBookingBtn.addEventListener('click', function() {
+                document.querySelector('.booking-form').submit();
+            });
+        }
+    });
+</script>
+{% endblock %}

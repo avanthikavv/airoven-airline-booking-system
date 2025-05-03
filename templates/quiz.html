@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Airline Safety Quiz</h2>
+            <div id="quizTimer" class="badge bg-primary">5:00</div>
+        </div>
+        <div class="card-body">
+            <p class="lead">Complete this quiz to earn bonus credits to your wallet!</p>
+            <p>For each correct answer, you'll earn ₹100 in your wallet.</p>
+            
+            <form id="quizForm" method="POST" action="{{ url_for('quiz') }}">
+                {{ form.hidden_tag() }}
+                
+                {% for i in range(5) %}
+                <div class="quiz-question mb-4">
+                    <h5>{{ questions[i]['question'] }}</h5>
+                    <div class="quiz-options mt-3">
+                        {% for option in questions[i]['options'] %}
+                            <label>
+                                <input type="radio" name="question_{{ i+1 }}" value="{{ option[0] }}"> {{ option }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn btn-primary mt-3" disabled>Submit Quiz</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="search-flights-container">
+    <h2 class="mb-4">Search Flights</h2>
+    
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('search_flights') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="row align-items-end">
+                    <div class="col-md-5 mb-3">
+                        <label for="origin" class="form-label">From</label>
+                        {{ form.origin(class="form-control", placeholder="Origin city") }}
+                        {% if form.origin.errors %}
+                            <div class="text-danger">
+                                {% for error in form.origin.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-2 mb-3 text-center">
+                        <button id="swapLocations" class="btn btn-secondary" type="button">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="col-md-5 mb-3">
+                        <label for="destination" class="form-label">To</label>
+                        {{ form.destination(class="form-control", placeholder="Destination city") }}
+                        {% if form.destination.errors %}
+                            <div class="text-danger">
+                                {% for error in form.destination.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    {{ form.submit(class="btn btn-primary btn-lg") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if direct_flights or connecting_flights %}
+    <!-- Search Results -->
+    <div class="search-results">
+        <h3 class="mb-3">Flights from {{ origin }} to {{ destination }}</h3>
+        
+        {% if direct_flights %}
+        <!-- Direct Flights -->
+        <div class="mb-4">
+            <h4 class="mb-3">Direct Flights</h4>
+            
+            {% for flight in direct_flights %}
+            <div class="flight-card">
+                <div class="content">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="airline-logo">
+                            AO
+                        </div>
+                        <div>
+                            <span class="flight-status">{{ flight.status }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-info">
+                        <div class="flight-path">
+                            <div class="airport">
+                                <div class="airport-code">{{ flight.origin[:3].upper() }}</div>
+                                <div class="airport-name">{{ flight.origin }}</div>
+                                <div class="flight-time">{{ flight.departure_time.strftime('%H:%M') }}</div>
+                                <div>{{ flight.departure_time.strftime('%d %b') }}</div>
+                            </div>
+                            
+                            <div class="flight-line"></div>
+                            
+                            <div class="airport">
+                                <div class="airport-code">{{ flight.destination[:3].upper() }}</div>
+                                <div class="airport-name">{{ flight.destination }}</div>
+                                <div class="flight-time">{{ flight.arrival_time.strftime('%H:%M') }}</div>
+                                <div>{{ flight.arrival_time.strftime('%d %b') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-details">
+                        <div class="detail">
+                            <div class="detail-label">Flight</div>
+                            <div class="detail-value">{{ flight.flight_number }}</div>
+                        </div>
+                        
+                        <div class="detail">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">{{ ((flight.arrival_time - flight.departure_time).total_seconds() / 3600)|round(1) }} hrs</div>
+                        </div>
+                        
+                        <div class="detail">
+                            <div class="detail-label">Aircraft</div>
+                            <div class="detail-value">{{ flight.aircraft_type }}</div>
+                        </div>
+                        
+                        <div>
+                            <div class="detail-label">Starting from</div>
+                            <div class="flight-price">₹{{ flight.economy_price }}</div>
+                        </div>
+                        
+                        <div>
+                            <a href="{{ url_for('book_flight', flight_id=flight.id) }}" class="btn btn-primary">
+                                <i class="fas fa-ticket-alt"></i> Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if connecting_flights %}
+        <!-- Connecting Flights -->
+        <div>
+            <h4 class="mb-3">Connecting Flights</h4>
+            
+            {% for connection in connecting_flights %}
+            <div class="flight-card">
+                <div class="content">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="airline-logo">
+                            AO
+                        </div>
+                        <div>
+                            <span class="badge bg-info">Connecting Flight</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-info">
+                        <div class="flight-path">
+                            <div class="airport">
+                                <div class="airport-code">{{ connection.first_leg.origin[:3].upper() }}</div>
+                                <div class="airport-name">{{ connection.first_leg.origin }}</div>
+                                <div class="flight-time">{{ connection.first_leg.departure_time.strftime('%H:%M') }}</div>
+                                <div>{{ connection.first_leg.departure_time.strftime('%d %b') }}</div>
+                            </div>
+                            
+                            <div class="flight-line"></div>
+                            
+                            <div class="airport">
+                                <div class="airport-code">{{ connection.first_leg.destination[:3].upper() }}</div>
+                                <div class="airport-name">{{ connection.first_leg.destination }}</div>
+                                <div class="flight-time">{{ connection.first_leg.arrival_time.strftime('%H:%M') }}</div>
+                                <div>{{ connection.first_leg.arrival_time.strftime('%d %b') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center my-3">
+                        <span class="badge bg-secondary p-2">
+                            <i class="fas fa-clock"></i> {{ connection.connection_time|round(1) }} hour layover at {{ connection.first_leg.destination }}
+                        </span>
+                    </div>
+                    
+                    <div class="flight-info">
+                        <div class="flight-path">
+                            <div class="airport">
+                                <div class="airport-code">{{ connection.second_leg.origin[:3].upper() }}</div>
+                                <div class="airport-name">{{ connection.second_leg.origin }}</div>
+                                <div class="flight-time">{{ connection.second_leg.departure_time.strftime('%H:%M') }}</div>
+                                <div>{{ connection.second_leg.departure_time.strftime('%d %b') }}</div>
+                            </div>
+                            
+                            <div class="flight-line"></div>
+                            
+                            <div class="airport">
+                                <div class="airport-code">{{ connection.second_leg.destination[:3].upper() }}</div>
+                                <div class="airport-name">{{ connection.second_leg.destination }}</div>
+                                <div class="flight-time">{{ connection.second_leg.arrival_time.strftime('%H:%M') }}</div>
+                                <div>{{ connection.second_leg.arrival_time.strftime('%d %b') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-details mt-3">
+                        <div class="detail">
+                            <div class="detail-label">Flights</div>
+                            <div class="detail-value">{{ connection.first_leg.flight_number }} + {{ connection.second_leg.flight_number }}</div>
+                        </div>
+                        
+                        <div class="detail">
+                            <div class="detail-label">Total Duration</div>
+                            <div class="detail-value">{{ connection.total_duration|round(1) }} hrs</div>
+                        </div>
+                        
+                        <div>
+                            <div class="detail-label">Starting from</div>
+                            <div class="flight-price">₹{{ connection.total_price_economy }}</div>
+                        </div>
+                        
+                        <div>
+                            <a href="{{ url_for('flight_details', flight_id=connection.first_leg.id) }}" class="btn btn-secondary me-2">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                            <a href="#" class="btn btn-primary view-map-btn" data-first-leg="{{ connection.first_leg.id }}" data-second-leg="{{ connection.second_leg.id }}">
+                                <i class="fas fa-map-marker-alt"></i> View Map
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if not direct_flights and not connecting_flights %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No flights found from {{ origin }} to {{ destination }}. Please try different cities or dates.
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Map Modal for Connecting Flights -->
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mapModalLabel">Flight Route Map</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="flight-map" data-first-leg="" data-second-leg=""></div>
+                    <div id="flight-info" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View Map button handlers
+        const mapButtons = document.querySelectorAll('.view-map-btn');
+        const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
+        
+        mapButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const firstLegId = this.getAttribute('data-first-leg');
+                const secondLegId = this.getAttribute('data-second-leg');
+                
+                // Update map modal data attributes
+                document.getElementById('flight-map').setAttribute('data-first-leg', firstLegId);
+                document.getElementById('flight-map').setAttribute('data-second-leg', secondLegId);
+                
+                // Show modal
+                mapModal.show();
+                
+                // Leaflet needs to recalculate dimensions after modal is shown
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 250);
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="flight-schedules-container">
+    <h2 class="mb-4">Flight Schedules</h2>
+    
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" id="scheduleSearch" class="form-control" placeholder="Search by flight number, origin, or destination">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex justify-content-end">
+                    <button id="filterToggle" class="btn btn-secondary">
+                        <i class="fas fa-filter"></i> Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filters (Hidden by default) -->
+            <div id="filterContainer" class="mt-3 d-none">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <select class="form-select" id="originFilter">
+                            <option value="">Origin (All)</option>
+                            <!-- Dynamically populate options using JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select class="form-select" id="destinationFilter">
+                            <option value="">Destination (All)</option>
+                            <!-- Dynamically populate options using JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Status (All)</option>
+                            <option value="On Time">On Time</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="Advance">Advance</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select class="form-select" id="sortBy">
+                            <option value="departure_asc">Departure Time (Earliest)</option>
+                            <option value="departure_desc">Departure Time (Latest)</option>
+                            <option value="price_asc">Price (Low to High)</option>
+                            <option value="price_desc">Price (High to Low)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Flight Tables -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="flightScheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Flight #</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Economy Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for flight in flights %}
+                        <tr>
+                            <td>{{ flight.flight_number }}</td>
+                            <td>{{ flight.origin }}</td>
+                            <td>{{ flight.destination }}</td>
+                            <td>{{ flight.departure_time.strftime('%d-%b-%Y %H:%M') }}</td>
+                            <td>{{ flight.arrival_time.strftime('%d-%b-%Y %H:%M') }}</td>
+                            <td>{{ ((flight.arrival_time - flight.departure_time).total_seconds() / 3600)|round(1) }} hrs</td>
+                            <td><span class="flight-status">{{ flight.status }}</span></td>
+                            <td>₹{{ flight.economy_price }}</td>
+                            <td>
+                                <a href="{{ url_for('flight_details', flight_id=flight.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Populate filters with unique values
+        const flights = {{ flights|tojson }};
+        const origins = new Set();
+        const destinations = new Set();
+        
+        flights.forEach(flight => {
+            origins.add(flight.origin);
+            destinations.add(flight.destination);
+        });
+        
+        const originFilter = document.getElementById('originFilter');
+        const destinationFilter = document.getElementById('destinationFilter');
+        
+        // Sort the unique values alphabetically
+        const sortedOrigins = Array.from(origins).sort();
+        const sortedDestinations = Array.from(destinations).sort();
+        
+        sortedOrigins.forEach(origin => {
+            const option = document.createElement('option');
+            option.value = origin;
+            option.textContent = origin;
+            originFilter.appendChild(option);
+        });
+        
+        sortedDestinations.forEach(destination => {
+            const option = document.createElement('option');
+            option.value = destination;
+            option.textContent = destination;
+            destinationFilter.appendChild(option);
+        });
+        
+        // Search functionality
+        const scheduleSearch = document.getElementById('scheduleSearch');
+        const flightTable = document.getElementById('flightScheduleTable');
+        const tableRows = flightTable.querySelectorAll('tbody tr');
+        
+        scheduleSearch.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            tableRows.forEach(row => {
+                const flightNum = row.cells[0].textContent.toLowerCase();
+                const origin = row.cells[1].textContent.toLowerCase();
+                const destination = row.cells[2].textContent.toLowerCase();
+                
+                if (flightNum.includes(searchTerm) || origin.includes(searchTerm) || destination.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Filter functionality
+        function applyFilters() {
+            const originValue = originFilter.value.toLowerCase();
+            const destinationValue = destinationFilter.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            
+            tableRows.forEach(row => {
+                const origin = row.cells[1].textContent.toLowerCase();
+                const destination = row.cells[2].textContent.toLowerCase();
+                const status = row.cells[6].textContent.trim();
+                
+                let showRow = true;
+                
+                if (originValue && origin !== originValue) {
+                    showRow = false;
+                }
+                
+                if (destinationValue && destination !== destinationValue) {
+                    showRow = false;
+                }
+                
+                if (statusValue && status !== statusValue) {
+                    showRow = false;
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+        
+        originFilter.addEventListener('change', applyFilters);
+        destinationFilter.addEventListener('change', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        
+        // Sorting functionality
+        document.getElementById('sortBy').addEventListener('change', function() {
+            const sortValue = this.value;
+            const tbody = flightTable.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                if (sortValue === 'departure_asc') {
+                    return new Date(a.cells[3].textContent) - new Date(b.cells[3].textContent);
+                } else if (sortValue === 'departure_desc') {
+                    return new Date(b.cells[3].textContent) - new Date(a.cells[3].textContent);
+                } else if (sortValue === 'price_asc') {
+                    return parseFloat(a.cells[7].textContent.replace('₹', '')) - parseFloat(b.cells[7].textContent.replace('₹', ''));
+                } else if (sortValue === 'price_desc') {
+                    return parseFloat(b.cells[7].textContent.replace('₹', '')) - parseFloat(a.cells[7].textContent.replace('₹', ''));
+                }
+                return 0;
+            });
+            
+            // Clear and re-add rows in sorted order
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="my-bookings-container">
+    <h2 class="mb-4">My Bookings</h2>
+    
+    {% if bookings %}
+    <div class="row">
+        {% for booking in bookings %}
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Booking #{{ booking.id }}</h5>
+                    <span class="badge {% if booking.status == 'Confirmed' %}bg-success{% elif booking.status == 'Cancelled' %}bg-danger{% else %}bg-warning{% endif %}">
+                        {{ booking.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Flight Details -->
+                    <div class="flight-card mb-3">
+                        <div class="content">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="airline-logo">
+                                    AO
+                                </div>
+                                <div>
+                                    <span class="flight-status">{{ booking.flight.status }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flight-info">
+                                <div class="flight-path">
+                                    <div class="airport">
+                                        <div class="airport-code">{{ booking.flight.origin[:3].upper() }}</div>
+                                        <div class="airport-name">{{ booking.flight.origin }}</div>
+                                        <div class="flight-time">{{ booking.flight.departure_time.strftime('%H:%M') }}</div>
+                                        <div>{{ booking.flight.departure_time.strftime('%d %b') }}</div>
+                                    </div>
+                                    
+                                    <div class="flight-line"></div>
+                                    
+                                    <div class="airport">
+                                        <div class="airport-code">{{ booking.flight.destination[:3].upper() }}</div>
+                                        <div class="airport-name">{{ booking.flight.destination }}</div>
+                                        <div class="flight-time">{{ booking.flight.arrival_time.strftime('%H:%M') }}</div>
+                                        <div>{{ booking.flight.arrival_time.strftime('%d %b') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Details -->
+                    <div class="booking-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <strong>Flight:</strong> {{ booking.flight.flight_number }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Passenger:</strong> {{ booking.passenger_name }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Contact:</strong> {{ booking.contact_number }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Booked On:</strong> {{ booking.booking_date.strftime('%d %b %Y') }}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <strong>Class:</strong> {{ booking.travel_class.capitalize() }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Seat:</strong> {{ booking.seat_number }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Price:</strong> ₹{{ booking.price_paid }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Status:</strong> <span class="badge {% if booking.status == 'Confirmed' %}bg-success{% elif booking.status == 'Cancelled' %}bg-danger{% else %}bg-warning{% endif %}">{{ booking.status }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="booking-actions mt-3">
+                        {% if booking.status == 'Confirmed' and booking.flight.departure_time > now %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('flight_details', flight_id=booking.flight.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle"></i> Flight Details
+                            </a>
+                            
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ booking.id }}">
+                                <i class="fas fa-times-circle"></i> Cancel Booking
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="d-flex justify-content-center">
+                            <a href="{{ url_for('flight_details', flight_id=booking.flight.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle"></i> Flight Details
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cancel Booking Modal -->
+            {% if booking.status == 'Confirmed' %}
+            <div class="modal fade" id="cancelModal{{ booking.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ booking.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelModalLabel{{ booking.id }}">Cancel Booking</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Are you sure you want to cancel this booking?
+                            </div>
+                            
+                            <p>Cancellation details:</p>
+                            <ul>
+                                <li>Flight: {{ booking.flight.flight_number }} ({{ booking.flight.origin }} to {{ booking.flight.destination }})</li>
+                                <li>Departure: {{ booking.flight.departure_time.strftime('%d %b %Y, %H:%M') }}</li>
+                                <li>Passenger: {{ booking.passenger_name }}</li>
+                                <li>Class: {{ booking.travel_class.capitalize() }}</li>
+                                <li>Seat: {{ booking.seat_number }}</li>
+                            </ul>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> You will receive a 50% refund (₹{{ (booking.price_paid * 0.5)|round(2) }}) to your wallet.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Booking</button>
+                            <form action="{{ url_for('cancel_booking', booking_id=booking.id) }}" method="POST">
+                                <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <div style="font-size: 4rem; color: var(--secondary-text); margin-bottom: 1rem;">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h3>No Bookings Yet</h3>
+            <p class="text-muted">You haven't made any flight bookings yet.</p>
+            <a href="{{ url_for('search_flights') }}" class="btn btn-primary mt-3">
+                <i class="fas fa-search"></i> Search Flights
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Travel Tips -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Travel Tips</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex">
+                        <div class="me-3 text-primary" style="font-size: 2rem;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h6>Arrive Early</h6>
+                            <p class="small text-muted">Arrive at the airport at least 2 hours before domestic flights and 3 hours before international flights.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex">
+                        <div class="me-3 text-primary" style="font-size: 2rem;">
+                            <i class="fas fa-passport"></i>
+                        </div>
+                        <div>
+                            <h6>Travel Documents</h6>
+                            <p class="small text-muted">Carry a valid ID proof along with your booking confirmation for all flights.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex">
+                        <div class="me-3 text-primary" style="font-size: 2rem;">
+                            <i class="fas fa-suitcase-rolling"></i>
+                        </div>
+                        <div>
+                            <h6>Baggage Rules</h6>
+                            <p class="small text-muted">Check baggage allowance for your booking class to avoid additional charges.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add current date to template for comparing with flight dates
+        window.now = new Date();
+    });
+</script>
+{% endblock %}

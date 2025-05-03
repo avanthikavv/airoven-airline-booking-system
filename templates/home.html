@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Welcome to AIROVEN</h1>
+        <p>Your journey begins with us. Discover seamless travel experiences with our efficient airline reservation system.</p>
+        <a href="{{ url_for('search_flights') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-search"></i> Search Flights
+        </a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Flight Schedules</h3>
+                <p>Explore our comprehensive flight schedules to plan your journey better.</p>
+                <a href="{{ url_for('flight_schedules') }}" class="btn btn-secondary mt-3">View Schedules</a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Search Flights</h3>
+                <p>Find the perfect flight for your next adventure with our search tool.</p>
+                <a href="{{ url_for('search_flights') }}" class="btn btn-secondary mt-3">Search Now</a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h3>Manage Bookings</h3>
+                <p>View and manage your bookings with ease. Cancel tickets if your plans change.</p>
+                <a href="{{ url_for('my_bookings') }}" class="btn btn-secondary mt-3">My Bookings</a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="feature-box">
+                <div class="feature-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h3>Digital Wallet</h3>
+                <p>Manage your funds securely with our integrated digital wallet system.</p>
+                <a href="{{ url_for('wallet') }}" class="btn btn-secondary mt-3">My Wallet</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Welcome Card -->
+<section class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h3>Hello, {{ current_user.first_name }}!</h3>
+                    <p>Thanks for choosing AIROVEN. We're dedicated to making your travel experience smooth and comfortable.</p>
+                    <p>Your current wallet balance: <span class="badge bg-success p-2">₹{{ current_user.wallet_balance }}</span></p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div style="font-size: 5rem; color: var(--accent-color);">
+                        <i class="fas fa-plane"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Destinations -->
+<section class="container mt-5">
+    <h2 class="mb-4">Popular Destinations</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Mumbai</h3>
+                    <p>The city of dreams</p>
+                    <a href="{{ url_for('search_flights', destination='Mumbai') }}" class="btn btn-outline-primary">Explore Flights</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>London</h3>
+                    <p>The historic capital</p>
+                    <a href="{{ url_for('search_flights', destination='London') }}" class="btn btn-outline-primary">Explore Flights</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>New York</h3>
+                    <p>The big apple</p>
+                    <a href="{{ url_for('search_flights', destination='New York') }}" class="btn btn-outline-primary">Explore Flights</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
