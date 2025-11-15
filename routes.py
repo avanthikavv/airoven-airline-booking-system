@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash
 from app import db
 from models import User, Flight, Booking
 from forms import SignupForm, LoginForm, QuizForm, SearchFlightForm, BookingForm, AddMoneyForm, AddFlightForm
+from flask_wtf.csrf import generate_csrf
+
 
 # Quiz questions
 quiz_questions = [
@@ -426,12 +428,15 @@ def register_routes(app):
         
         return render_template('booking.html', form=form, flight=flight)
     
+
     @app.route('/my_bookings')
     @login_required
     def my_bookings():
         bookings = Booking.query.filter_by(user_id=current_user.id).all()
-        return render_template('my_bookings.html', bookings=bookings)
-    
+        csrf_token = generate_csrf()
+        return render_template('my_bookings.html', bookings=bookings, csrf_token=csrf_token, now=datetime.utcnow())
+
+
     @app.route('/cancel_booking/<int:booking_id>', methods=['POST'])
     @login_required
     def cancel_booking(booking_id):

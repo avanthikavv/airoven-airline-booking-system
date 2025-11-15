@@ -3,7 +3,7 @@
 {% block content %}
 <div class="wallet-container">
     <h2 class="mb-4">My Wallet</h2>
-    
+
     <div class="row">
         <div class="col-lg-8">
             <!-- Wallet Card -->
@@ -14,7 +14,7 @@
                         <span class="currency">₹</span>{{ current_user.wallet_balance }}
                     </div>
                 </div>
-                
+
                 <!-- Add Money Form -->
                 <div class="card mt-4 bg-transparent border">
                     <div class="card-header border-0 bg-transparent">
@@ -22,54 +22,39 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('wallet') }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            
+                            {{ form.hidden_tag() }}
+
                             <div class="mb-3">
                                 <label for="amount" class="form-label">Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" name="amount" id="amount" class="form-control" 
-                                           placeholder="Enter amount to add" min="1" step="any" required>
+                                    {{ form.amount(class="form-control", type="number", min="1", step="0.01", placeholder="Enter amount", autofocus=True) }}
                                 </div>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Add to Wallet</button>
                                 </div>
                             </div>
-                            
                         </form>
-                        
+
                         <div class="quick-amounts">
                             <h6 class="mt-4 mb-2">Quick Add:</h6>
                             <div class="d-flex flex-wrap justify-content-between">
+                                {% for amt in [500, 1000, 2000, 5000] %}
                                 <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden" name="preset_amount" value="500">
-                                    <button type="submit" class="btn btn-outline-primary">₹500</button>
+                                    {{ form.hidden_tag() }}
+                                    <input type="hidden" name="preset_amount" value="{{ amt }}">
+                                    <button type="submit" class="btn btn-outline-primary">₹{{ "{:,}".format(amt) }}</button>
                                 </form>
-                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden" name="preset_amount" value="1000">
-                                    <button type="submit" class="btn btn-outline-primary">₹1,000</button>
-                                </form>
-                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden" name="preset_amount" value="2000">
-                                    <button type="submit" class="btn btn-outline-primary">₹2,000</button>
-                                </form>
-                                <form method="POST" action="{{ url_for('wallet') }}" class="m-1">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                    <input type="hidden" name="preset_amount" value="5000">
-                                    <button type="submit" class="btn btn-outline-primary">₹5,000</button>
-                                </form>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Transaction History -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -107,7 +92,7 @@
                                     <td><span class="badge bg-success">Credit</span></td>
                                 </tr>
                                 {% endif %}
-                                
+
                                 {% for booking in current_user.bookings %}
                                 <tr>
                                     <td>{{ booking.booking_date.strftime('%d %b %Y') }}</td>
@@ -116,7 +101,7 @@
                                     <td><span class="badge bg-danger">Debit</span></td>
                                 </tr>
                                 {% endfor %}
-                                
+
                                 <tr>
                                     <td>{{ current_user.date_registered.strftime('%d %b %Y') }}</td>
                                     <td>Wallet Created</td>
@@ -129,7 +114,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-4">
             <!-- Wallet Information -->
             <div class="card mb-4">
@@ -157,7 +142,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             <!-- Wallet Benefits -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -171,7 +156,7 @@
                         </div>
                         <p class="small mb-0">Book flights instantly without entering payment details each time.</p>
                     </div>
-                    
+
                     <div class="benefit-item mb-3">
                         <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-shield-alt text-success me-2"></i>
@@ -179,7 +164,7 @@
                         </div>
                         <p class="small mb-0">All wallet transactions are encrypted and secure.</p>
                     </div>
-                    
+
                     <div class="benefit-item mb-3">
                         <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-undo-alt text-info me-2"></i>
@@ -187,7 +172,7 @@
                         </div>
                         <p class="small mb-0">Cancellations are automatically refunded to your wallet.</p>
                     </div>
-                    
+
                     <div class="benefit-item">
                         <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-gift text-danger me-2"></i>
@@ -197,7 +182,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Need Help -->
             <div class="card">
                 <div class="card-header">
@@ -215,12 +200,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // No longer needed as quick amounts now use form submissions
-    });
-</script>
 {% endblock %}

@@ -15,7 +15,7 @@ class User(UserMixin, db.Model):
     quiz_completed = db.Column(db.Boolean, default=False)
     date_registered = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Define relationship with Booking
+    # Relationship with Booking
     bookings = db.relationship('Booking', backref='user', lazy=True, cascade='all, delete-orphan')
     
     def set_password(self, password):
@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
             return True
         return False
     
-    def __repr__(self):
+    def _repr_(self):
         return f'<User {self.email}>'
 
 class Flight(db.Model):
@@ -52,40 +52,59 @@ class Flight(db.Model):
     available_seats_business = db.Column(db.Integer, default=20)
     aircraft_type = db.Column(db.String(50), nullable=False)
     distance_km = db.Column(db.Integer)
-    
-    # Define relationship with Booking
+
+    # Relationship with Booking
     bookings = db.relationship('Booking', backref='flight', lazy=True, cascade='all, delete-orphan')
-    
+
     def get_price(self, travel_class):
-        if travel_class.lower() == 'economy':
+        travel_class = travel_class.lower()
+        if travel_class == 'economy':
             return self.economy_price
-        elif travel_class.lower() == 'premium':
+        elif travel_class == 'premium':
             return self.premium_price
-        elif travel_class.lower() == 'business':
+        elif travel_class == 'business':
             return self.business_price
         return 0
-    
+
     def book_seat(self, travel_class):
-        if travel_class.lower() == 'economy' and self.available_seats_economy > 0:
+        travel_class = travel_class.lower()
+        if travel_class == 'economy' and self.available_seats_economy > 0:
             self.available_seats_economy -= 1
             return True
-        elif travel_class.lower() == 'premium' and self.available_seats_premium > 0:
+        elif travel_class == 'premium' and self.available_seats_premium > 0:
             self.available_seats_premium -= 1
             return True
-        elif travel_class.lower() == 'business' and self.available_seats_business > 0:
+        elif travel_class == 'business' and self.available_seats_business > 0:
             self.available_seats_business -= 1
             return True
         return False
-    
+
     def release_seat(self, travel_class):
-        if travel_class.lower() == 'economy':
+        travel_class = travel_class.lower()
+        if travel_class == 'economy':
             self.available_seats_economy += 1
-        elif travel_class.lower() == 'premium':
+        elif travel_class == 'premium':
             self.available_seats_premium += 1
-        elif travel_class.lower() == 'business':
+        elif travel_class == 'business':
             self.available_seats_business += 1
-    
-    def __repr__(self):
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'flight_number': self.flight_number,
+            'origin': self.origin,
+            'destination': self.destination,
+            'departure_time': self.departure_time.strftime('%Y-%m-%d %H:%M'),
+            'arrival_time': self.arrival_time.strftime('%Y-%m-%d %H:%M'),
+            'status': self.status,
+            'economy_price': self.economy_price,
+            'premium_price': self.premium_price,
+            'business_price': self.business_price,
+            'aircraft_type': self.aircraft_type,
+            'distance_km': self.distance_km
+        }
+
+    def _repr_(self):
         return f'<Flight {self.flight_number}>'
 
 class Booking(db.Model):
@@ -101,6 +120,6 @@ class Booking(db.Model):
     passenger_gender = db.Column(db.String(10), nullable=False)
     contact_number = db.Column(db.String(15))
     status = db.Column(db.String(20), default="Confirmed")
-    
-    def __repr__(self):
+
+    def _repr_(self):
         return f'<Booking {self.id}>'

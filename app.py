@@ -6,6 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_login import LoginManager
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
+
+
+# Add this line after app is created
+
+
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +27,7 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "airoven_secret_key_for_development")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+csrf = CSRFProtect(app)
 
 # Configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///airoven.db")
